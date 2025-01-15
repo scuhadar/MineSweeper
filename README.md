@@ -1,4 +1,5 @@
 Minesweeper Game
+
 <img width="379" alt="easy - you win" src="https://github.com/user-attachments/assets/e5ab7801-c749-4643-9e4c-979d23a487d1" />
 
 This is a Scala implementation of the classic Minesweeper game with a graphical user interface (GUI) using the FunGraphics library. The game allows players to choose difficulty levels, explore the grid, and flag potential mines.
@@ -17,6 +18,7 @@ Features
 Graphical Interface:
 	•	Intuitive and colorful grid representation.
 	•	Mines and flags visually represented with icons and colors.
+ 
  <img width="829" alt="hard" src="https://github.com/user-attachments/assets/82cc42f0-6138-4ddd-af15-c49b3a638f4f" />
 
 Game Interaction:
@@ -30,6 +32,7 @@ Timers and Counters:
 	•	Win/Lose Conditions:
 	•	Lose: Reveal a mine.
 	•	Win: Successfully reveal all non-mine cells.
+ 
 <img width="387" alt="minesweeper - easy" src="https://github.com/user-attachments/assets/45388571-2159-4c13-b231-998c3e72960a" />
 
 How to Play
@@ -41,7 +44,8 @@ How to Play
 	4.	The game ends when:
 	•	All non-mine cells are revealed (Win).
 	•	A mine is revealed (Lose).
-![Uploading minesweeper -medium -gameover.png…]()
+
+<img width="585" alt="minesweeper -medium -gameover" src="https://github.com/user-attachments/assets/fb26650b-79ce-40a2-a076-619306ae2fe1" />
 
 Key Bindings
 	•	R: Restart the game.

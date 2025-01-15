@@ -6,21 +6,24 @@ import scala.util.Random
 
 object MineSweeper extends App {
   val cellSize = 30
-  val selectedLevel = "easy"
+  val selectedLevel = "medium"  //level must be written here manually
 
+  // Determine grid size based on selected difficulty level
   val gridSize:Int= selectedLevel match{
     case "easy"   => 9
     case "medium" => 16
     case "hard"   => 24
     case _        => 9
   }
-
+  // Determine number of mines based on selected difficulty level
   val numMines:Int= selectedLevel match {
-    case "easy" => 10
+    case "easy"   => 10
     case "medium" => 40
-    case "hard" => 90
+    case "hard"   => 90
+    case _        => 10
   }
 
+  // Calculate window size based on grid size and cell size
   val window:Int=(cellSize*gridSize)+100
 
   val display = new FunGraphics(window, window, "MINESWEEPER")
@@ -28,11 +31,12 @@ object MineSweeper extends App {
   val startX = (window - cellTotalSize) / 2
   val startY = (window - cellTotalSize) / 2
 
-  var gameOver = false // Oyunun bitiş durumunu kontrol etmek için
+  var gameOver = false // Track whether the game has ended
   var mineImage = new GraphicsBitmap("/res/mine.jfif")
   val scaleRate = (cellSize.toDouble / mineImage.getWidth) * 0.6
-  var remainingMines:Int =numMines
+  var remainingMines:Int =numMines  // Track the number of remaining mines
 
+  // Initialize grid with cells
   val grid: Array[Array[Cell]] = Array.ofDim[Cell](gridSize, gridSize)
   for (x <- 0 until gridSize) {
     for (y <- 0 until gridSize) {
@@ -40,6 +44,7 @@ object MineSweeper extends App {
     }
   }
 
+  // Draw the game grid
   def drawGrid(): Unit = {
     display.clear()
     for (col <- 0 until gridSize; row <- 0 until gridSize) {
@@ -50,24 +55,26 @@ object MineSweeper extends App {
 
       val cellColor =
         if (cell.isRevealed) {
-          if (cell.isMine) Color.WHITE
-          else Color.LIGHT_GRAY
+          if (cell.isMine) Color.WHITE // Revealed mine cell color
+          else Color.LIGHT_GRAY  // Revealed non-mine cell color
         } else {
-          Color.CYAN
+          Color.CYAN  // Hidden cell color
         }
 
       display.setColor(cellColor)
       display.drawFillRect(x + startX, y + startY, cellSize, cellSize)
 
       display.setColor(Color.BLACK)
-      display.drawRect(x + startX, y + startY, cellSize, cellSize)
+      display.drawRect(x + startX, y + startY, cellSize, cellSize)  // Draw cell border
 
+      // Draw mine if the cell contains one and is revealed
       if (cell.isRevealed && cell.isMine) {
         val centerX = x + startX + cellSize / 2
         val centerY = y + startY + cellSize / 2
         display.drawTransformedPicture(centerX, centerY, angle = 0, scale = scaleRate, mineImage)
       }
 
+      // Draw flag if the cell is flagged and not revealed
       if (cell.isFlagged && !cell.isRevealed) {
         val fontSize = (cellSize * 0.6).toInt
         val centerX = x + startX + cellSize / 2
@@ -86,6 +93,7 @@ object MineSweeper extends App {
         display.drawString(textX, textY, flagText, font, Color.RED)
       }
 
+      // Draw number of adjacent mines if the cell is revealed and not a mine
       if (cell.isRevealed && !cell.isMine && cell.adjacentMines > 0) {
         val fontSize = (cellSize * 0.5).toInt
         val centerX = x + startX + cellSize / 2
@@ -117,6 +125,7 @@ object MineSweeper extends App {
       }
     }
 
+    // Display game-over and won messages if the game ends
     if (gameOver) {
       display.setColor(Color.RED)
       val font = new Font("SansSerif", Font.BOLD, 20)
@@ -125,7 +134,7 @@ object MineSweeper extends App {
       val x = (window - bounds.getWidth.toInt) / 2
       val y = (window + bounds.getHeight.toInt) / 2
       display.drawString(x, y, message, font, Color.RED)
-    } else if (checkWin()) {
+    } else if (checkWin()) {  // Display win message if all non-mine cells are revealed
       display.setColor(Color.GREEN)
       val font = new Font("SansSerif", Font.BOLD, 20)
       val message = s"You Won! You passed $secondsElapsed second"
@@ -134,9 +143,10 @@ object MineSweeper extends App {
       val y = (window + bounds.getHeight.toInt) / 2
       display.drawString(x, y, message, font, Color.blue)
     }
-    drawMineCounterBox()
+    drawMineCounterBox()  // Update the mine counter display
   }
 
+  // Reveal all mines when the game is over
   def revealAllMines(): Unit = {
     for (row <- 0 until gridSize; col <- 0 until gridSize) {
       val cell = grid(row)(col)
@@ -148,6 +158,7 @@ object MineSweeper extends App {
     drawGrid()
   }
 
+  // Check if the player has won the game
   def checkWin(): Boolean = {
     for (row <- 0 until gridSize; col <- 0 until gridSize) {
       val cell = grid(row)(col)
@@ -158,6 +169,7 @@ object MineSweeper extends App {
     true
   }
 
+  // Reveal adjacent cells recursively when an empty cell is clicked
   def recurseReveal(row: Int, col: Int): Unit = {
     if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) return
 
@@ -174,6 +186,7 @@ object MineSweeper extends App {
     }
   }
 
+  // Handle mouse events for cell selection and flagging
   display.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent): Unit = {
       if (gameOver || checkWin()) return
@@ -187,7 +200,7 @@ object MineSweeper extends App {
       if (col >= 0 && col < gridSize && row >= 0 && row < gridSize) {
         val cell = grid(row)(col)
 
-        if (e.getButton == MouseEvent.BUTTON1) {
+        if (e.getButton == MouseEvent.BUTTON1) { // Left-click to reveal a cell
           if (!cell.isRevealed && !cell.isFlagged) {
             if (cell.isMine) {
               revealAllMines()
@@ -198,7 +211,7 @@ object MineSweeper extends App {
             }
             drawGrid()
           }
-        } else if (e.getButton == MouseEvent.BUTTON3) {
+        } else if (e.getButton == MouseEvent.BUTTON3) { // Right-click to toggle flag
           if (!cell.isRevealed) {
             cell.isFlagged = !cell.isFlagged
             if(cell.isFlagged) remainingMines-=1 else remainingMines +=1
@@ -210,6 +223,7 @@ object MineSweeper extends App {
     }
   })
 
+  // Place mines randomly on the grid
   def placeMines(numMines: Int): Unit = {
     val random = new Random()
     var minesPlaced = 0
@@ -225,6 +239,7 @@ object MineSweeper extends App {
     }
   }
 
+  // Count the number of mines surrounding a given cell
   def countSurroundingMines(row: Int, col: Int): Int = {
     var count = 0
 
@@ -238,6 +253,7 @@ object MineSweeper extends App {
     count
   }
 
+  // Calculate the number of adjacent mines for each cell
   def calculateMineCounts(): Unit = {
     for (row <- 0 until gridSize; col <- 0 until gridSize) {
       if (!grid(row)(col).isMine) {
@@ -246,6 +262,7 @@ object MineSweeper extends App {
     }
   }
 
+  // Reset the game to its initial state
   def resetGame():Unit={
     secondsElapsed = 0
     remainingMines = numMines
@@ -267,23 +284,24 @@ object MineSweeper extends App {
     drawGrid()
   }
 
-  // Ekranda zamanlayıcı kutusunu çizmek için bir fonksiyon
+  // Draw a timer box to display elapsed time
   def drawTimerBox(): Unit = {
-    val boxWidth = 110  // Kutu genişliği
-    val boxHeight = 30  // Kutu yüksekliği
-    val boxX = (window-cellTotalSize)/2 // Kutunun X pozisyonu (ekranın sağında)
-    val boxY = 10  // Kutunun Y pozisyonu (ekranın üst kısmında)
+    val boxWidth = 110  // Box width
+    val boxHeight = 30  // Box height
+    val boxX = (window-cellTotalSize)/2   // Box X position
+    val boxY = 10                         // Box Y position
 
-    // Kutu çiz
+    // Draw the box
     display.setColor(Color.cyan)
-    display.drawFillRect(boxX, boxY, boxWidth, boxHeight)  // Çerçeve çiz
+    display.drawFillRect(boxX, boxY, boxWidth, boxHeight)
 
-    // Zamanlayıcıyı kutunun içine yaz
-    display.setColor(Color.white)  // Yazıyı beyaz yap
+    // Draw the timer text inside the box
+    display.setColor(Color.white)
     val timerText = s"Time: $secondsElapsed"
-    display.drawString(boxX+5 ,boxY+20,timerText)  // Yazıyı kutuya yerleştir
+    display.drawString(boxX+5 ,boxY+20,timerText)
   }
 
+  // Draw a mine counter box to display remaining mines
   def drawMineCounterBox():Unit={
     val boxWidth =100
     val boxHeight = 30
@@ -299,6 +317,7 @@ object MineSweeper extends App {
     display.drawString(boxX+5,boxY+20, mineCounterText)
   }
 
+  // Handle key events for restarting the game
   display.setKeyManager(new KeyAdapter() {
     override def keyPressed(e: KeyEvent):Unit={
       if (e.getKeyChar == 'r' || e.getKeyChar == 'R'){
@@ -318,17 +337,20 @@ object MineSweeper extends App {
   // Variables for tracking time and game state
   var secondsElapsed: Int = 0  // Tracks the number of seconds passed since the start
   // Function to start the timer when the game begins
+
   def startTimer(): Unit = {
     new Thread(new Runnable {
       def run(): Unit = {
-        while (!gameOver && ! checkWin()  )  {    // Loop runs until the game is over
-          Thread.sleep(1000)      // Wait for 1 second
-          secondsElapsed += 1     // Increment the time by 1 second
+        while (!gameOver && ! checkWin()  )  {  // Loop runs until the game is over
+          Thread.sleep(1000)   // Wait for 1 second
+          secondsElapsed += 1  // Increment the time by 1 second
           drawTimerBox()
         }
       }
     }).start()  // Start the thread in the background
   }
+
+  // Initialize the game by setting up mines, counts, and the timer
   def initializeGame(): Unit = {
     startTimer()
     placeMines(numMines)
@@ -336,5 +358,5 @@ object MineSweeper extends App {
     drawGrid()
     drawMineCounterBox()
   }
-  initializeGame()
+  initializeGame()  // Start the game
 }

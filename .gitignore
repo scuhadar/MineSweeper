@@ -1,0 +1,13 @@
+# Derleme dosyaları
+out/
+*.class
+
+# IDE ve yapılandırma dosyaları
+.DS_Store
+*.iml
+
+# Kütüphane dosyaları
+*.jar
+
+# Diğer geçici dosyalar
+*.log
